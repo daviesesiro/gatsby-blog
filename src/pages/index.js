@@ -1,22 +1,75 @@
 import React from "react"
-import { Link } from "gatsby"
+import { graphql, Link } from "gatsby"
+import styled from 'styled-components'
 
 import Layout from "../components/layout"
-import Image from "../components/image"
+// import Image from "../components/image"
 import SEO from "../components/seo"
 
-const IndexPage = () => (
+const BlogCard = styled.div`
+  margin: 40px 0 40px;
+  background: #ecdfff;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 4px 10px 10px rgba(0, 0, 0,0.5);
+  transition: all .4s ease;
+
+  &:hover{
+    box-shadow: 4px 10px 5px rgba(0, 0, 0,0.3);
+  }
+`
+
+const BlogLink = styled(Link)`
+  text-decoration: none;
+  color: black;
+`
+
+const BlogTitile = styled.h3`
+  margin-bottom: 20px;
+  color: blue;
+`
+
+export default ({ data }) => {
+  console.log(data)
+  return(
   <Layout>
     <SEO title="Home" />
-    <h1>Hi people</h1>
-    <p>Welcome to your new Gatsby site.</p>
-    <p>Now go build something great.</p>
-    <div style={{ maxWidth: `300px`, marginBottom: `1.45rem` }}>
-      <Image />
+    <div>
+      <h1>Davies' Thoughts</h1>
     </div>
-    <Link to="/page-2/">Go to page 2</Link> <br />
-    <Link to="/using-typescript/">Go to "Using TypeScript"</Link>
+    {
+      data.allMarkdownRemark.edges.map(({ node }) => (
+        <BlogCard key={node.id}>
+          <BlogLink to={node.fields.slug}>
+          <BlogTitile>
+            {node.frontmatter.title} - {node.frontmatter.date}
+          </BlogTitile>
+            <p>{node.excerpt}</p>
+          </BlogLink>
+        </BlogCard>
+      ))
+    }
   </Layout>
-)
+)}
 
-export default IndexPage
+export const query = graphql`
+query{
+	allMarkdownRemark(sort: { fields: [frontmatter___date],order: DESC}){
+    totalCount
+    edges{
+      node{
+        id
+        frontmatter{
+          description
+          title
+          date
+        }
+        fields{
+          slug
+        }
+        excerpt
+      }
+    }     
+  }
+}
+`
